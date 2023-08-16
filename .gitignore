@@ -183,3 +183,4 @@ pyrightconfig.json
 
 # DEB Workshop
 de-lifecycle
+*.conf
