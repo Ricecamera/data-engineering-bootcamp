@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "00-bootcamp-project"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Sahatsarin Pawanna <58083752+Ricecamera@users.noreply.github.com>"]
 readme = "README.md"
@@ -12,6 +12,7 @@ requests = "^2.29.0"
 pysftp = "^0.2.9"
 psycopg2 = "^2.9.6"
 google-cloud-bigquery = "^3.9.0"
+google-cloud-storage = "^2.8.0"
 
 [tool.poetry.dev-dependencies]
 
