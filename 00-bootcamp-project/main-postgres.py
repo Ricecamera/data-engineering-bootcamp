@@ -3,6 +3,7 @@ import configparser
 
 import psycopg2
 
+
 parser = configparser.ConfigParser()
 parser.read("pipeline.conf")
 dbname = parser.get("postgres_config", "database")
@@ -20,7 +21,7 @@ DATA_FOLDER = "data"
 table = "addresses"
 header = ["address_id", "address", "zipcode", "state", "country"]
 with open(f"{DATA_FOLDER}/addresses.csv", "w") as f:
-    writer = csv.writer(f) 
+    writer = csv.writer(f)
     writer.writerow(header)
 
     query = f"select * from {table}"

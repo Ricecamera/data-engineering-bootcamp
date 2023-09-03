@@ -14,7 +14,7 @@ def _get_date_part(ds, **context):
 with DAG(
     dag_id="play_with_templating",
     schedule="@daily",
-    start_date=timezone.datetime(2023, 8, 1),
+    start_date=timezone.datetime(2023, 8, 27),
     catchup=False,
     tags=["DEB", "2023"],
 ):

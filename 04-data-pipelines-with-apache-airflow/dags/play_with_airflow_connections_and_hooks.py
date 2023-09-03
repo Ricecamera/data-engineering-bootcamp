@@ -7,7 +7,7 @@ import great_expectations as ge
 
 def _get_data():
     pg_hook = PostgresHook(
-        postgres_conn_id="Postgres",
+        postgres_conn_id="my_postgres_conn",
         schema="greenery"
     )
     connection = pg_hook.get_conn()
@@ -21,24 +21,9 @@ def _get_data():
     for each in rows:
         print(each)
 
-def _get_data(table, dt):
-    pg_hook = PostgresHook(
-        postgres_conn_id="Postgres",
-        schema="greenery"
-    )
-    connection = pg_hook.get_conn()
-    cursor = connection.cursor()
-
-    sql = f"select * from {table} where date(created_at) = '{dt}'"
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    for each in rows:
-        print(each)
-
-
 def _dump_data(table: str):
     pg_hook = PostgresHook(
-        postgres_conn_id="Postgres",
+        postgres_conn_id="my_postgres_conn",
         schema="greenery"
     )
     pg_hook.bulk_dump(table, f"/opt/airflow/dags/{table}_export")
@@ -77,4 +62,4 @@ with DAG(
         python_callable=_validate_data,
     )
 
-    dump_product_data >> validate_data
+    get_data >> dump_product_data >> validate_data

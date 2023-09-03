@@ -32,9 +32,15 @@ storage_client = storage.Client(
 )
 bucket = storage_client.bucket(bucket_name)
 
+bigquery_client = bigquery.Client(
+    project=project_id,
+    credentials=credentials_bigquery,
+    location=location,
+)
+
 non_partition_tables = ["addresses", "products", "order_items", "promos"]
-partition_tables = ["events", "users", "orders"]
-for data in (non_partition_tables + partition_tables):
+
+for data in non_partition_tables:
     file_path = f"{DATA_FOLDER}/{data}.csv"
     destination_blob_name = f"{BUSINESS_DOMAIN}/{data}/{data}.csv"
 
@@ -42,18 +48,117 @@ for data in (non_partition_tables + partition_tables):
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_filename(file_path)
 
+    # Load data from GCS to BigQuery
+    job_config = bigquery.LoadJobConfig(
+        skip_leading_rows=1,
+        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+        source_format=bigquery.SourceFormat.CSV,
+        autodetect=True,
+    )
+
+    table_id = f"{project_id}.deb_bootcamp_project.{data}"
+    destination_blob_name = f"{BUSINESS_DOMAIN}/{data}/{data}.csv"
+    job = bigquery_client.load_table_from_uri(
+        f"gs://{bucket_name}/{destination_blob_name}",
+        table_id,
+        job_config=job_config,
+        location=location,
+    )
+    job.result()
+
+    table = bigquery_client.get_table(table_id)
+    print(f"Loaded {table.num_rows} rows and {len(table.schema)} columns to {table_id}")
+
+
+# ----- Events -----
+
+# Load data from Local to GCS
+data = "events"
+dt = "2021-02-10"
+partition = dt.replace("-", "")
+file_path = f"{DATA_FOLDER}/{data}.csv"
+destination_blob_name = f"{BUSINESS_DOMAIN}/{data}/{dt}/{data}.csv"
+blob = bucket.blob(destination_blob_name)
+blob.upload_from_filename(file_path)
+
 # Load data from GCS to BigQuery
-bigquery_client = bigquery.Client(
-    project=project_id,
-    credentials=credentials_bigquery,
-    location=location,
-)
-table_id = f"{project_id}.deb_bootcamp_project.{data}"
+table_id = f"{project_id}.deb_bootcamp_project.{data}${partition}"
 job_config = bigquery.LoadJobConfig(
     skip_leading_rows=1,
     write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
     source_format=bigquery.SourceFormat.CSV,
     autodetect=True,
+    time_partitioning=bigquery.TimePartitioning(
+        type_=bigquery.TimePartitioningType.DAY,
+        field="created_at",
+    ),
+)
+job = bigquery_client.load_table_from_uri(
+    f"gs://{bucket_name}/{destination_blob_name}",
+    table_id,
+    job_config=job_config,
+    location=location,
+)
+job.result()
+
+table = bigquery_client.get_table(table_id)
+print(f"Loaded {table.num_rows} rows and {len(table.schema)} columns to {table_id}")
+
+# ----- Users -----
+
+data = "users"
+dt = "2020-10-23"
+partition = dt.replace("-", "")
+file_path = f"{DATA_FOLDER}/{data}.csv"
+destination_blob_name = f"{BUSINESS_DOMAIN}/{data}/{dt}/{data}.csv"
+blob = bucket.blob(destination_blob_name)
+blob.upload_from_filename(file_path)
+
+# Load data from GCS to BigQuery
+table_id = f"{project_id}.deb_bootcamp_project.{data}${partition}"
+job_config = bigquery.LoadJobConfig(
+    skip_leading_rows=1,
+    write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+    source_format=bigquery.SourceFormat.CSV,
+    autodetect=True,
+    time_partitioning=bigquery.TimePartitioning(
+        type_=bigquery.TimePartitioningType.DAY,
+        field="created_at",
+    ),
+    clustering_fields=["first_name", "last_name"],
+)
+job = bigquery_client.load_table_from_uri(
+    f"gs://{bucket_name}/{destination_blob_name}",
+    table_id,
+    job_config=job_config,
+    location=location,
+)
+job.result()
+
+table = bigquery_client.get_table(table_id)
+print(f"Loaded {table.num_rows} rows and {len(table.schema)} columns to {table_id}")
+
+# ----- Orders -----
+
+data = "orders"
+dt = "2021-02-10"
+partition = dt.replace("-", "")
+file_path = f"{DATA_FOLDER}/{data}.csv"
+destination_blob_name = f"{BUSINESS_DOMAIN}/{data}/{dt}/{data}.csv"
+blob = bucket.blob(destination_blob_name)
+blob.upload_from_filename(file_path)
+
+# Load data from GCS to BigQuery
+table_id = f"{project_id}.deb_bootcamp_project.{data}${partition}"
+job_config = bigquery.LoadJobConfig(
+    skip_leading_rows=1,
+    write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+    source_format=bigquery.SourceFormat.CSV,
+    autodetect=True,
+    time_partitioning=bigquery.TimePartitioning(
+        type_=bigquery.TimePartitioningType.DAY,
+        field="created_at",
+    ),
 )
 job = bigquery_client.load_table_from_uri(
     f"gs://{bucket_name}/{destination_blob_name}",

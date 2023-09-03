@@ -1,5 +1,7 @@
 import configparser
+
 import pysftp
+
 
 parser = configparser.ConfigParser()
 parser.read("pipeline.conf")
@@ -19,6 +21,7 @@ DATA_FOLDER = "data"
 # โค้ดด้านล่างจะเป็นการโหลดไฟล์ orders.csv ซึ่งเป็นข้อมูล orders
 # ให้แก้โค้ดด้านล่างให้ไปโหลดไฟล์ข้อมูล products และ promos แทน
 files = [
+    # "orders.csv",
     "products.csv",
     "promos.csv"
 ]
